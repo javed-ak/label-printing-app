@@ -5,6 +5,7 @@ import { jsPDF } from 'jspdf';
 const LabelUploader = () => {
   const [labels, setLabels] = useState([]);
   const [labelSize, setLabelSize] = useState({ width: 100, height: 50 });
+  const [sizeUnit, setSizeUnit] = useState('px'); // Default is pixels
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
@@ -20,6 +21,16 @@ const LabelUploader = () => {
     };
 
     reader.readAsArrayBuffer(file);
+  };
+
+  const convertToPixels = (size, unit) => {
+    if (unit === 'cm') {
+      return size * 37.7953; // Convert cm to pixels
+    } else if (unit === 'mm') {
+      return size * 3.77953; // Convert mm to pixels
+    } else {
+      return size; // Pixels remain the same
+    }
   };
 
   const handlePrint = () => {
@@ -43,22 +54,30 @@ const LabelUploader = () => {
       <input type="file" accept=".xlsx" onChange={handleFileUpload} />
 
       <div>
-        <h3>Set Label Size (in pixels)</h3>
+        <h3>Set Label Size</h3>
         <label>
           Width: 
-          <input 
-            type="number" 
-            value={labelSize.width} 
-            onChange={(e) => setLabelSize({ ...labelSize, width: e.target.value })} 
+          <input
+            type="number"
+            value={labelSize.width}
+            onChange={(e) => setLabelSize({ ...labelSize, width: e.target.value })}
           />
         </label>
         <label>
           Height: 
-          <input 
-            type="number" 
-            value={labelSize.height} 
-            onChange={(e) => setLabelSize({ ...labelSize, height: e.target.value })} 
+          <input
+            type="number"
+            value={labelSize.height}
+            onChange={(e) => setLabelSize({ ...labelSize, height: e.target.value })}
           />
+        </label>
+        <label>
+          Unit:
+          <select value={sizeUnit} onChange={(e) => setSizeUnit(e.target.value)}>
+            <option value="px">Pixels (px)</option>
+            <option value="cm">Centimeters (cm)</option>
+            <option value="mm">Millimeters (mm)</option>
+          </select>
         </label>
       </div>
 
@@ -67,18 +86,20 @@ const LabelUploader = () => {
           <h3>Labels Preview</h3>
           <div style={{ display: 'flex', flexWrap: 'wrap' }}>
             {labels.map((label, index) => (
-              <div 
-                key={index} 
-                style={{ 
-                  width: `${labelSize.width}px`, 
-                  height: `${labelSize.height}px`, 
-                  border: '1px solid black', 
-                  margin: '5px', 
-                  padding: '5px' 
+              <div
+                key={index}
+                style={{
+                  width: `${convertToPixels(labelSize.width, sizeUnit)}px`,
+                  height: `${convertToPixels(labelSize.height, sizeUnit)}px`,
+                  border: '1px solid black',
+                  margin: '5px',
+                  padding: '5px'
                 }}
               >
                 {Object.keys(label).map((key) => (
-                  <p key={key}><strong>{key}:</strong> {label[key]}</p>
+                  <p key={key}>
+                    <strong>{key}:</strong> {label[key]}
+                  </p>
                 ))}
               </div>
             ))}
