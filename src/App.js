@@ -1,5 +1,5 @@
 import React from 'react';
-import LabelUploader from './LabelUploader';
+import LabelUploader from './components/LabelUploader'; // Assuming LabelUploader.js is in the same folder
 
 function App() {
   return (
